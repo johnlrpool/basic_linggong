@@ -21,6 +21,7 @@
 #ifndef __SPI_H
 #define __SPI_H
 
+#include "esp_err.h"
 #include "esp_log.h"
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
@@ -29,11 +30,14 @@
 /* 引脚定义：根据用户接线修改 */
 #define SPI_MOSI_GPIO_PIN   GPIO_NUM_7          /* SPI2_MOSI */
 #define SPI_CLK_GPIO_PIN    GPIO_NUM_16         /* SPI2_CLK */
-#define SPI_MISO_GPIO_PIN   -1                  /* SPI2_MISO 未使用 */
+#define SPI_MISO_GPIO_PIN   GPIO_NUM_6          /* SPI2_MISO / LCD SDO */
 
 /* 函数声明 */
 void spi2_init(void);                                                               /* 初始化SPI2 */
 void spi2_write_cmd(spi_device_handle_t handle, uint8_t cmd);                       /* SPI发送命令 */
 void spi2_write_data(spi_device_handle_t handle, const uint8_t *data, int len);     /* SPI发送数据 */
+esp_err_t spi2_add_device(const spi_device_interface_config_t *devcfg,
+                          spi_device_handle_t *handle);                              /* SPI添加设备 */
+esp_err_t spi2_transmit(spi_device_handle_t handle, spi_transaction_t *trans);       /* SPI发送事务 */
 
 #endif

@@ -20,6 +20,10 @@
 
 #include "spi.h"
 
+#include <stdbool.h>
+
+static bool s_spi2_initialized;
+
 
 /**
  * @brief       初始化SPI
@@ -28,6 +32,11 @@
  */
 void spi2_init(void)
 {
+    if (s_spi2_initialized)
+    {
+        return;
+    }
+
     esp_err_t ret = 0;
     spi_bus_config_t spi_bus_conf = {0};
 
@@ -42,6 +51,18 @@ void spi2_init(void)
     /* 初始化SPI总线 */
     ret = spi_bus_initialize(SPI2_HOST, &spi_bus_conf, SPI_DMA_CH_AUTO);        /* SPI总线初始化 */
     ESP_ERROR_CHECK(ret);                                                       /* 校验参数值 */
+    s_spi2_initialized = true;
+}
+
+esp_err_t spi2_add_device(const spi_device_interface_config_t *devcfg, spi_device_handle_t *handle)
+{
+    spi2_init();
+    return spi_bus_add_device(SPI2_HOST, devcfg, handle);
+}
+
+esp_err_t spi2_transmit(spi_device_handle_t handle, spi_transaction_t *trans)
+{
+    return spi_device_polling_transmit(handle, trans);
 }
 
 /**
@@ -57,7 +78,7 @@ void spi2_write_cmd(spi_device_handle_t handle, uint8_t cmd)
 
     t.length = 8;                                       /* 要传输的位数 一个字节 8位 */
     t.tx_buffer = &cmd;                                 /* 将命令填充进去 */
-    ret = spi_device_polling_transmit(handle, &t);      /* 开始传输 */
+    ret = spi2_transmit(handle, &t);                    /* 开始传输 */
     ESP_ERROR_CHECK(ret);                               /* 一般不会有问题 */
 }
 
@@ -80,6 +101,6 @@ void spi2_write_data(spi_device_handle_t handle, const uint8_t *data, int len)
 
     t.length = len * 8;                             /* 要传输的位数 一个字节 8位 */
     t.tx_buffer = data;                             /* 将命令填充进去 */
-    ret = spi_device_polling_transmit(handle, &t);  /* 开始传输 */
+    ret = spi2_transmit(handle, &t);                /* 开始传输 */
     ESP_ERROR_CHECK(ret);                           /* 一般不会有问题 */
 }

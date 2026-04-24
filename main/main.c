@@ -1,27 +1,18 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
 #include "esp_log.h"
-#include "driver/gpio.h"
-#include "spi.h"
-#include "lcd.h"
+#include "icna3312.h"
 
 static const char *TAG = "main";
 
 void app_main(void)
 {
-    esp_log_level_set(TAG, ESP_LOG_INFO);
-
-    ESP_LOGI(TAG, "SPI2 init");
-    spi2_init();
-
-    ESP_LOGI(TAG, "LCD init");
+    ESP_LOGI(TAG, "starting ICNA3312 white-screen bring-up");
     lcd_init();
+    lcd_run_white_smoke_test();
 
-    ESP_LOGI(TAG, "LCD clear to white");
-    lcd_clear(WHITE);
-
-    while (1)
-    {
+    while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
