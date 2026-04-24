@@ -614,9 +614,18 @@ void lcd_display_dir(uint8_t dir)
 
 void lcd_minimal_init_sequence(void)
 {
+    uint8_t data;
+
     ESP_LOGI(TAG, "send SLPOUT and wait %d ms", LCD_SLPOUT_DELAY_MS);
     lcd_write_cmd(ICNA3312_SLPOUT);
     lcd_delay_ms(LCD_SLPOUT_DELAY_MS);
+
+    data = 0x55; /* RGB565 */
+    lcd_send_cmd_params(ICNA3312_COLMOD, &data, 1);
+    ESP_LOGI(TAG, "set COLMOD=0x55 (RGB565)");
+
+    lcd_write_cmd(ICNA3312_NORON);
+    lcd_delay_ms(10);
 }
 
 void lcd_run_white_smoke_test(void)
@@ -636,11 +645,10 @@ void lcd_run_white_smoke_test(void)
     data = 0x00;
     lcd_send_cmd_params(ICNA3312_WRACL, &data, 1);
 
-    ESP_LOGI(TAG, "white smoke test: WRCTRLD=0x28 WRDISBV=0xFF WRACL=0x00 DISPON ALLPON");
+    ESP_LOGI(TAG, "white smoke test: WRCTRLD=0x28 WRDISBV=0xFF WRACL=0x00 DISPON + RAM white");
     lcd_write_cmd(ICNA3312_DISPON);
     lcd_delay_ms(LCD_DISPON_DELAY_MS);
-    lcd_write_cmd(ICNA3312_ALLPON);
-    lcd_delay_ms(5);
+    lcd_clear(WHITE);
 
     lcd_log_status_registers("after white");
 }
