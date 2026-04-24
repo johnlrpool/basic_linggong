@@ -163,13 +163,11 @@ void ds4730_panel_power_on_sequence(void)
     ESP_LOGI(TAG, "enabling panel rails: VDDIO 1.8V + AVDD 2.8V");
     panel_enable_power_rails();
 
-    taskENTER_CRITICAL(&panel_swire_mux);
-
     ESP_LOGI(TAG, "programming RT4730 SWIRE levels: 17 -> 63 -> 116 -> 117");
+    taskENTER_CRITICAL(&panel_swire_mux);
     panel_program_rt4730_swire();
     PANEL_SWIRE(1);
     panel_hard_reset_pulse_nolock();
-
     taskEXIT_CRITICAL(&panel_swire_mux);
 
     vTaskDelay(pdMS_TO_TICKS(PANEL_POST_RESET_DELAY_MS));
